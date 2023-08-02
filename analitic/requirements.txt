@@ -1,0 +1,16 @@
+tiktoken
+langchain
+openai
+chromadb
+gspread
+oauth2client
+ipywidgets
+telebot
+ydb
+ydb[yc]
+redis
+python-binance
+flask
+#Flask-RESTX
+#flask-swagger
+flask-swagger-ui

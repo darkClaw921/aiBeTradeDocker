@@ -1,0 +1,26 @@
+CREATE TABLE `user`
+(
+    `id` Uint64,
+    `nicname` String,
+    `model` String,
+    `payload` String,
+    `promt` String,
+    `all_token` Int64,
+    `all_price` Double,
+    `all_messages` Uint64,
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `promt`
+(
+    `promt` String,
+    `url` String,
+    PRIMARY KEY (`promt`)
+);
+
+CREATE TABLE `model`
+(
+    `model` String,
+    `url` String,
+    PRIMARY KEY (`model`)
+);
