@@ -15,23 +15,23 @@ session = HTTP(
     api_secret=api_secret,
 )
 # Get the orderbook of the USDT Perpetual, BTCUSDT
-a = session.get_orderbook(category="linear", symbol="BTCUSDT")
+#a = session.get_orderbook(category="linear", symbol="BTCUSDT")
 #print(a)
-print(session.place_order(
-    category="inverse",
-    symbol="ETHUSD",
-    side="Sell",
-    orderType="Market",
-    qty=1,
-))
-1/0
+#session.ord
+# print(session.place_order(
+#     category="inverse",
+#     symbol="ETHUSD",
+#     side="Buy",
+#     orderType="Market",
+#     qty=1,
+# ))
 #GET /stocks/
 def stocks_list():
     stocks = [{
         "id": 1,
         "name":"ByBit", # Название биржи
-        "url": "https:#www.bybit.com/",# главная страница биржи
-        "apiUrl": "https:#bybit-exchange.github.io/docs/category/derivatives" ## Путь к API биржи
+        "url": "https://www.bybit.com/",# главная страница биржи
+        "apiUrl": "https://bybit-exchange.github.io/docs/category/derivatives" #// Путь к API биржи
     }]
 
     return stocks 
@@ -40,7 +40,7 @@ def stocks_list():
 def get_price_now_ByBit(coin:str='BTCUSD'):
     #symbol = 'BTCUSD'  # Торговая пара: BTC/USD
 # Вызов API для получения текущей цены
-    url = f'https:#api.bybit.com/v2/public/tickers?symbol={coin}'
+    url = f'https://api.bybit.com/v2/public/tickers?symbol={coin}'
     response = requests.get(url)
     data = response.json()
 
@@ -52,7 +52,7 @@ def get_price_now_ByBit(coin:str='BTCUSD'):
     return con
 
 def get_price_ByBit(date, coin):
-    url = "https:#api.bybit.com/v2/public/kline/list"
+    url = "https://api.bybit.com/v2/public/kline/list"
     params = {
         #"symbol": "BTCUSD",
         "symbol": coin,
@@ -87,43 +87,6 @@ def history_price_coin(coin:str,startDate:str,endDate:str):
     history = get_prices_ByBit(coin, startDate,endDate)
     return history
 
-#GET /orders/$id
-def get_order_info(orderID):
-    
-    order = {
-'id':  'unique_token_of_ordedr',  # ID ордера
-'stock': 'byibe', # название биржи
-'coin': 'btc', # название токена
-'amount': 10, # количество токенов
-'mode': 'buy | sell', # режим ордера (купить, продать)
-'state': 'pending | posted| done | canceled' # Статус ордера
-}
-    return order
-
-#POST /orders
-def set_order(order):
-   # Input
-# {
-# 'stock': 'byibe',# название биржи
-# 'coin': 'btc',# название токена
-# 'amount': 10,# количество токенов
-# 'mode': 'buy | sell',# режим ордера (купить, продать)
-# }
-
-    order = {
-'id':  'unique_token_of_ordedr',  # ID ордера
-'stock': 'byibe', # название биржи
-'coin': 'btc', # название токена
-'amount': 10, # количество токенов
-'mode': 'buy | sell', # режим ордера (купить, продать)
-'state': 'pending | posted| done | canceled' # Статус ордера
-}
-    return order
-    pass
-
-#DELETE /orders/$id
-def delete_order(orderID):
-    return f'ордер {orderID} был отозван'
 
 # Create five long USDC Options orders.
 # (Currently, only USDC Options support sending orders in bulk.)
