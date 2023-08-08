@@ -10,18 +10,18 @@ api_key = os.environ.get('bybit_api')
 api_secret =os.environ.get('bybit_secret') 
 
 session = HTTP(
-    testnet=True,
+    testnet=False,
     api_key=api_key,
     api_secret=api_secret,
 )
 # Get the orderbook of the USDT Perpetual, BTCUSDT
-#a = session.get_orderbook(category="linear", symbol="BTCUSDT")
-#print(a)
-#session.ord
+a = session.get_orderbook(category="linear", symbol="BTCUSDT")
+print(a)
+
 # print(session.place_order(
 #     category="inverse",
 #     symbol="ETHUSD",
-#     side="Buy",
+#     side="Sell",
 #     orderType="Market",
 #     qty=1,
 # ))
@@ -90,25 +90,34 @@ def history_price_coin(coin:str,startDate:str,endDate:str):
 
 # Create five long USDC Options orders.
 # (Currently, only USDC Options support sending orders in bulk.)
-# payload = {"category": "option"}
-# orders = [{
-#   "symbol": "BTCUSDT",
-#   "side": "Buy",
-#   "orderType": "Limit",
-#   "qty": "0.1",
-#   "price": '10',
-# } ]
+payload = {"category": "option"}
+orders = {
+  "symbol": "BTCUSDT",
+  "side": "Buy",
+  "orderType": "Limit",
+  "qty": "0.1",
+  "price": '10',
+}
+print(session.place_order(
+    category="inverse",
+    symbol="BTCUSDT",
+    side="Sell",
+    orderType="Limit",
+    qty='0.1',
+    price= '10'
+)) 
 
-# payload["request"] = orders
-# # Submit the orders in bulk.
-# session.place_batch_order(payload)
+#payload["request"] = orders
+# Submit the orders in bulk.
+session.place_batch_order(orders)
 
 if __name__ == '__main__':
+    pass
     #pprint(a)
     #a = get_price_coin()
-    a = get_btc_prices('2023-01-01','2023-01-03')
+    #a = get_btc_prices('2023-01-01','2023-01-03')
     #a = get_btc_price("2023-01-01")
-    print(a) 
+    #print(a) 
 #     category="linear",
 #     symbol="BTCUSDT",
 #     side="Buy",

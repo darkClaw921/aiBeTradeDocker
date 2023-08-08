@@ -3,14 +3,14 @@ from datetime import datetime, timedelta
 import redis
 import json
 #sql = workYDB.Ydb()
-from analitic.workBinance import get_BTC_analit_for
-from chat import GPT
+#from analitic.workBinance import get_BTC_analit_for
+#from chat import GPT
 from dotenv import load_dotenv
 import os
 load_dotenv()
 
-gpt = GPT()
-GPT.set_key(os.getenv('KEY_AI'))
+#gpt = GPT()
+#GPT.set_key(os.getenv('KEY_AI'))
 
 
 #datetime
@@ -24,11 +24,13 @@ def time_epoch():
 
 def get_dates(day):
     # Текущая дата
-    current_date = datetime.now().strftime("%d/%m/%Y")
+    #patern = '2023-07-18T20:26:32'
+    patern = '%Y-%m-%dT%H:%M:%S'
+    current_date = datetime.now().strftime(patern)
 
     # Дата, отстоящая на 30 дней
     delta = timedelta(days=day)
-    future_date = (datetime.now() + delta).strftime("%d/%m/%Y")
+    future_date = (datetime.now() + delta).strftime(patern)
 
     return current_date, future_date
 
@@ -66,55 +68,6 @@ def sum_dict_values(dict1, dict2):
 
     return result
 
-def forecastText(day:int):
-    promtUrl = 'https://docs.google.com/document/d/1_Ft4sDJJpGdBX8k2Et-OBIUtvO0TSuw8ZSjbv5r7H7I/edit?usp=sharing'
-    PROMT_URL = promtUrl 
-    #promt = gpt.load_prompt(promptUrl)
-    promt = gpt.load_prompt(PROMT_URL)
-    #promt = 
-    #print(f'{promptUrl=}')
-    analitBTC = get_BTC_analit_for(day)
-    #print(f'{analitBTC}')
-    current, future = get_dates(day)
-    print("Текущая дата:", current)
-    print(f"Дата через {day} дней:", future)
-    promt = promt.replace('[analitict]', analitBTC)
-    promt = promt.replace('[nextDate]', str(day))
-    promt = promt.replace('[nowDate]', future)
-    #print('#########################################', promt)
-    try:
-        mess = [{'role': 'system', 'content': promt,},
-                {'role': 'user', 'content': ' '}]
-        answer, allToken, allTokenPrice= gpt.answer(' ',mess,)
-        
-        row = {'all_price': float(allTokenPrice), 'all_token': int(allToken), 'all_messages': 1}
-        print(answer)
-        return answer
-    except Exception as e:
-        print(f'{e=}')
-
-def forecast(day:int):
-    answer = forecastText(day)
-    words = answer.replace('\n',' ').split(" ")
-    # Найти число в строке
-    print(words)
-    for word in words:
-        if word.isdigit():
-            number = int(word)
-            print(number)
-            return number
-            
-    print(f'{number=}')  # Вывод: 29536
-
-def forecastDaily(days:int):
-    price = []
-    for day in range(1,days+1):
-        price.append(forecast(day))
-    #current, future = get_dates(day)
-    #print("Текущая дата:", current)
-    #print(f"Дата через {day} дней:", future)
-    print(f'{price=}')
-    return {price}
 
 if __name__ == '__main__':
-    forecast(1)
+    pass

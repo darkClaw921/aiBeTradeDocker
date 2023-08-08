@@ -34,5 +34,5 @@ def get_prices(stockId,coin, startDate, endDate):
 
 # Запуск приложения
 if __name__ == '__main__':
+    app.run(host='0.0.0.0', port='5001')
     # 0000 позволяет получать запросы не только по localhost
-    app.run(host='0.0.0.0')

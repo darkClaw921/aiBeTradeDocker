@@ -1,13 +1,14 @@
 from datetime import datetime, timedelta
-#import workYDB
+import workYDB
 import redis
 import json
-#sql = workYDB.Ydb()
-from analitic.workBinance import get_BTC_analit_for
+from workBinance import get_BTC_analit_for
 from chat import GPT
 from dotenv import load_dotenv
 import os
+
 load_dotenv()
+sql = workYDB.Ydb()
 
 gpt = GPT()
 GPT.set_key(os.getenv('KEY_AI'))
@@ -21,6 +22,18 @@ def time_epoch():
 
     millis_since_epoch = sec_since_epoch * 1000
     return int(millis_since_epoch)
+
+def get_dates_YDB(day):
+    # Текущая дата
+    #patern = '2023-07-18T20:26:32'
+    patern = '%Y-%m-%dT%H:%M:%S'
+    current_date = datetime.now().strftime(patern)
+
+    # Дата, отстоящая на 30 дней
+    delta = timedelta(days=day)
+    future_date = (datetime.now() + delta).strftime(patern)
+
+    return current_date, future_date
 
 def get_dates(day):
     # Текущая дата
@@ -76,6 +89,7 @@ def forecastText(day:int):
     analitBTC = get_BTC_analit_for(day)
     #print(f'{analitBTC}')
     current, future = get_dates(day)
+    
     print("Текущая дата:", current)
     print(f"Дата через {day} дней:", future)
     promt = promt.replace('[analitict]', analitBTC)
@@ -101,11 +115,21 @@ def forecast(day:int):
     for word in words:
         if word.isdigit():
             number = int(word)
+            current_YDB, future_YDB = get_dates_YDB(day)
+            row ={
+                'time_epoh': time_epoch(),
+                'date_open':current_YDB, 
+                'date_close':future_YDB,
+                'price_close': number }
+            sql.insert_query('prognoz', row)
+            
             print(number)
+            
             return number
             
     print(f'{number=}')  # Вывод: 29536
-
+    
+    
 def forecastDaily(days:int):
     price = []
     for day in range(1,days+1):
@@ -114,7 +138,7 @@ def forecastDaily(days:int):
     #print("Текущая дата:", current)
     #print(f"Дата через {day} дней:", future)
     print(f'{price=}')
-    return {price}
+    return {'price': price}
 
 if __name__ == '__main__':
     forecast(1)

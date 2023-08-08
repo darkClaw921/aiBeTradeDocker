@@ -6,17 +6,17 @@ import requests
 from datetime import datetime, timedelta
 
 load_dotenv()
-api_key = os.environ.get('bybit_api')
-api_secret =os.environ.get('bybit_secret') 
+api_key = os.environ.get('gate_api')
+api_secret =os.environ.get('gate_secret') 
 
-session = HTTP(
-    testnet=True,
-    api_key=api_key,
-    api_secret=api_secret,
-)
-# Get the orderbook of the USDT Perpetual, BTCUSDT
+# session = HTTP(
+#     testnet=True,
+#     api_key=api_key,
+#     api_secret=api_secret,
+# )
+# # Get the orderbook of the USDT Perpetual, BTCUSDT
 # a = session.get_orderbook(category="linear", symbol="BTCUSDT")
-#print(a)
+# #print(a)
 # print(session.place_order(
 #     category="inverse",
 #     symbol="ETHUSD",
@@ -24,7 +24,18 @@ session = HTTP(
 #     orderType="Market",
 #     qty=1,
 # ))
-#1/0
+# 1/0
+#GET /stocks/
+def stocks_list():
+    stocks = [{
+        "id": 1,
+        "name":"ByBit", # Название биржи
+        "url": "https:#www.bybit.com/",# главная страница биржи
+        "apiUrl": "https:#bybit-exchange.github.io/docs/category/derivatives" ## Путь к API биржи
+    }]
+
+    return stocks 
+
 #GET /stocks/$stockId/coins/$coin/price
 def get_price_now_ByBit(coin:str='BTCUSD'):
     #symbol = 'BTCUSD'  # Торговая пара: BTC/USD
@@ -40,7 +51,7 @@ def get_price_now_ByBit(coin:str='BTCUSD'):
     con = {"price": price}
     return con
 
-def get_price_ByBit(date, coin):
+def get_price(date, coin):
     url = "https:#api.bybit.com/v2/public/kline/list"
     params = {
         #"symbol": "BTCUSD",
@@ -55,7 +66,7 @@ def get_price_ByBit(date, coin):
     data = response.json()["result"][0]
     return {"date": datetime.fromtimestamp(data["open_time"]).strftime("%Y-%m-%d"), "price": data["open"]}
 
-def get_prices_ByBit(coin:str, start_date:str, end_date:str):
+def get_prices(coin:str, start_date:str, end_date:str):
     start = datetime.strptime(start_date, "%Y-%m-%d")
     end = datetime.strptime(end_date, "%Y-%m-%d")
     delta = timedelta(days=1)
@@ -67,13 +78,13 @@ def get_prices_ByBit(coin:str, start_date:str, end_date:str):
 
     prices = []
     for date in dates:
-        prices.append(get_price_ByBit(date, coin))
+        prices.append(get_price(date, coin))
     
     return prices
 
 #GET /stocks/$stockId/coins/$coin/priceDaily/$from/$to
 def history_price_coin(coin:str,startDate:str,endDate:str):
-    history = get_prices_ByBit(coin, startDate,endDate)
+    history = get_prices(coin, startDate,endDate)
     return history
 
 #GET /orders/$id
@@ -128,13 +139,15 @@ def delete_order(orderID):
 # payload["request"] = orders
 # # Submit the orders in bulk.
 # session.place_batch_order(payload)
-
+def test():
+    pass
 if __name__ == '__main__':
     #pprint(a)
+    test()
     #a = get_price_coin()
-    a = get_btc_prices('2023-01-01','2023-01-03')
+    #a = get_btc_prices('2023-01-01','2023-01-03')
     #a = get_btc_price("2023-01-01")
-    print(a) 
+    #print(a) 
 #     category="linear",
 #     symbol="BTCUSDT",
 #     side="Buy",

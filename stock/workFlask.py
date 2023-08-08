@@ -1,8 +1,22 @@
-from flask import Flask 
+from flask import Flask, request, render_template
 #from analitic.helper import forecast, forecastText, forecastDaily 
 from bybitWork import *
+from gateWork import *
 # Создание экземпляра Flask приложения
 app = Flask(__name__)
+def stocks_list():
+    stocks = [{
+        "id": 1,
+        "name":"ByBit", # Название биржи
+        "url": "https://www.bybit.com/",# главная страница биржи
+        "apiUrl": "https://bybit-exchange.github.io/docs/category/derivatives" ## Путь к API биржи
+    }, {
+        "id": 2,
+        "name":"Gate", # Название биржи
+        "url": "gate.io",# главная страница биржи
+        "apiUrl": "https://api.gateio.ws/api/v4" ## Путь к API биржи]
+    }]
+    return stocks 
 
 @app.route('/stocks')
 def stoks():
@@ -31,10 +45,10 @@ def get_prices(stockId,coin, startDate, endDate):
     #stock = stocks_list()
     return prices
 
-@app.route('/orders/<int:id>',methods=['GET'])
+@app.route('/orders/<int:orderID>',methods=['GET'])
 def get_order(orderID):
     #2023-01-01','2023-01-03'
-    order = get_order_info(orderID)
+    order = info_order(orderID)
     # if stockId == 1:
     #     prices= history_price_coin(coin,startDate,endDate)
     # else:
@@ -44,9 +58,18 @@ def get_order(orderID):
     return order
 
 @app.route('/orders',methods=['POST'])
-def create_order(order):
+def set_order():
+    from decimal import Decimal
     #2023-01-01','2023-01-03'
-    order = set_order(order)
+    data = request.get_json() 
+    
+    data['amount'] = Decimal(data['amount'])
+    print(data)
+    try:
+        order = create_order(data)
+    except Exception as e:
+        raise ValueError(e)
+        #return e
     # if stockId == 1:
     #     prices= history_price_coin(coin,startDate,endDate)
     # else:
@@ -54,12 +77,18 @@ def create_order(order):
     #     # raise ValueError(f'Нет биржы с id {stockId}')
     #stock = stocks_list()
     return order
-@app.route('/orders',methods=['POST'])
+#@app.route('/orders',methods=['POST'])
 
 #DELETE /orders/$id
+
+@app.route('/orders/<int:orderID>',methods=['DELETE'])
+@logger.catch
 def del_order(orderID):
     #2023-01-01','2023-01-03'
-    order = delete_order(orderID)
+
+    order = close_order(orderID)
+    
+        #raise 'ORDER_NOT_FOUND'
     # if stockId == 1:
     #     prices= history_price_coin(coin,startDate,endDate)
     # else:
@@ -68,10 +97,17 @@ def del_order(orderID):
     #stock = stocks_list()
     return order
 
+# @app.errorhandler(Exception)
+# def handle_exception(e):
+#     # обработка ошибки
+#     print(f'++++++++++++++++{e=}')
+#     #return render_template('/Users/igorgerasimov/Python/Bitrix/aiBeTradeDocker/stock/error.html', error=str(e)), 500
+# #    return render_template('error.html'), 500
+#     return e
 
 
 
 # Запуск приложения
 if __name__ == '__main__':
     # 0000 позволяет получать запросы не только по localhost
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0',port='5001',debug=False)

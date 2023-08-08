@@ -1,0 +1,33 @@
+CREATE TABLE `order`
+(
+    `time_epoh` Uint64,
+    `amount` Double,
+    `currency_pair` String,
+    `date_close` String,
+    `date_open` String,
+    `need_date_close` String,
+    `need_price_close` Double,
+    `orderID` Int64,
+    `price_close` Double,
+    `price_insert` Double,
+    `price_open` Double,
+    `side` String,
+    `status` String,
+    PRIMARY KEY (`time_epoh`)
+);
+
+CREATE TABLE `prognoz`
+(
+    `time_epoh` Uint64,
+    `currency_pair` String,
+    `date_close` String,
+    `date_open` String,
+    `need_date_close` String,
+    `need_price_close` Double,
+    `price_close` Double,
+    `price_open` Double,
+    `side` String,
+    `type` string,
+    
+    PRIMARY KEY (`time_epoh`)
+);

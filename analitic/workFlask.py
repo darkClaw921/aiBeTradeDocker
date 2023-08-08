@@ -1,5 +1,5 @@
 from flask import Flask 
-from analitic.helper import forecast, forecastText, forecastDaily 
+from helper import forecast, forecastText, forecastDaily 
 # Создание экземпляра Flask приложения
 app = Flask(__name__)
 
@@ -7,19 +7,6 @@ app = Flask(__name__)
 def home():
     return 'Привет, мир!'
 
-# def forecast(coin:str):
-
-#     return {'price': 12345}
-
-# def forecastDaily(coin:str):
-#     return {'price': [12345, 10, 20]}
-
-# def forecastText(coin:str):
-#     return {'data': """Дата прогноза: 11/07/23
-# Предсказанная стоимость биткоина на 16/07/23: 30410
-# Использованные методы:
-# 1. Свечной график: Анализ свечей позволяет определить тренды и ключевые уровни поддержки и сопротивления. В данном случае, мы видим, что цена биткоина в последние недели колеблется в узком диапазоне между 29800 и 30700. Это является зоной сопротивления и поддержки соответственно.
-# """} http://localhost:3000/stocks/23/coins/btc/sa/2
 #http://localhost:3000/stocks/23/coins/btc/sa/2
 @app.route('/stocks/<int:stockId>/coins/<string:coin>/<string:func>/<int:days>', methods=['GET'])
 def coin(stockId, coin, func, days):
@@ -44,4 +31,7 @@ def coin(stockId, coin, func, days):
 # Запуск приложения
 if __name__ == '__main__':
     # 0000 позволяет получать запросы не только по localhost
-    app.run(host='0.0.0.0')
+    #app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port='5001')
+    #answer = forecastText(1)
+    #print(answer)
