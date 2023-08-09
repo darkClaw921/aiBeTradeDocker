@@ -2,34 +2,57 @@ from flask import Flask
 #from analitic.helper import forecast, forecastText, forecastDaily 
 from bybitWork import *
 # Создание экземпляра Flask приложения
+from infoStrat import *
 app = Flask(__name__)
 
 @app.route('/stocks')
 def stoks():
     stock = stocks_list()
     return stock
+#GET /strategies/$name/info
+@app.route('/strategies/<string:name>/info', methods=['GET'])
+def get_strategie_name(name):
+   
+    return strats[name]
 
-@app.route('/stocks/<int:stockId>/coins/<string:coin>/price')
-def get_price_now(stockId,coin):
-    #BTCUSD
 
-    if stockId == 1:
-        priceNow = get_price_now_ByBit(coin)
-    else:
-        raise ValueError(f'Нет биржы с id {stockId}')
-    #stock = stocks_list()
-    return priceNow
+#POST /strategies/$name/signals
+@app.route('/strategies/<string:name>/signal', methods=['POST'])
+def get_strategie_signal(name):
+    pass
 
-# /stocks/$stockId/coins/$coin/priceDaily/$from/$to
-@app.route('/stocks/<int:stockId>/coins/<string:coin>/priceDaily/<string:startDate>/<string:endDate>')
-def get_prices(stockId,coin, startDate, endDate):
-    #2023-01-01','2023-01-03'
-    if stockId == 1:
-        prices= history_price_coin(coin,startDate,endDate)
-    else:
-        raise ValueError(f'Нет биржы с id {stockId}')
-    #stock = stocks_list()
-    return prices
+# Input
+# {
+# 	“stockId”: “37”, // id биржи для которой проводится анализ
+# 	“coin”: “BTC”, // Код монеты для которой рассматривается стратегия
+# 	“start_date”: yyyy-mm-dd, // Начальная дата работы стратегии (если пусто, то сегодня),
+# 	“days”: 15, // Время моделирования в днях,
+# 	“params”: { // параметры стратегии
+# 		“$min_enter_price”: $value1,
+# 		“$param2”: $value2,
+# }
+# }
+@app.route('/strategies/<string:name>/actions/<int:stockID>/<string:coin>', methods=['POST'])
+def get_strategie_signal(name, stockID, coin):
+    pass
+
+# GET /strategies/$name/actions/$stockId/$coin
+@app.route('/strategies/<string:name>/actions/<int:stockID>/<string:coin>', methods=['GET'])
+def get_strategie_signal(name, stockID, coin):
+    pass
+
+# {
+# 	“strategy”: “name of strategy”, 
+# “stockId”: “37”, // id биржи для которой проводится анализ
+# 	“coin”: “BTC”, // Код монеты для которой рассматривается стратегия
+# 	“action”: “none | buy”,
+# 	“buyPrice”: 100, // По какой цене сделать покупку
+# 	"sellPrice”: 200, // По какой цене выставить продаже
+# 	“sellPeriod”: 7 // Сколько дней держать ордер на продажу (максимум).
+# }
+
+
+
 
 
 # Запуск приложения

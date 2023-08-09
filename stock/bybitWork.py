@@ -29,7 +29,7 @@ session = HTTP(
 def get_price_now_ByBit(coin:str='BTCUSD'):
     #symbol = 'BTCUSD'  # Торговая пара: BTC/USD
 # Вызов API для получения текущей цены
-    url = f'https:#api.bybit.com/v2/public/tickers?symbol={coin}'
+    url = f'https://api.bybit.com/v2/public/tickers?symbol={coin}'
     response = requests.get(url)
     data = response.json()
 
@@ -40,22 +40,45 @@ def get_price_now_ByBit(coin:str='BTCUSD'):
     con = {"price": price}
     return con
 
-def get_price_ByBit(date, coin):
-    url = "https:#api.bybit.com/v2/public/kline/list"
+def get_price_ByBit(date, coin, interval='D'):
+    url = "https://api.bybit.com/v2/public/kline/list"
     params = {
         #"symbol": "BTCUSD",
         "symbol": coin,
-        "interval": "D",
+        "interval": interval,
         "from": int(datetime.strptime(date, "%Y-%m-%d").timestamp()),
         "limit": 1,
         "reverse": False
     }
     response = requests.get(url, params=params)
-    #pprint(response.text)
+    pprint(response.text)
     data = response.json()["result"][0]
+
     return {"date": datetime.fromtimestamp(data["open_time"]).strftime("%Y-%m-%d"), "price": data["open"]}
 
-def get_prices_ByBit(coin:str, start_date:str, end_date:str):
+def get_price_ByBit_interval_60m(date, coin, interval='60')->list:
+    #интервал в секундах
+    url = "https://api.bybit.com/v2/public/kline/list"
+    params = {
+        #"symbol": "BTCUSD",
+        "symbol": coin,
+        "interval": interval,
+        #"interval": "60",
+        "from": int(datetime.strptime(date, "%Y-%m-%d").timestamp()),
+        "limit": 24,
+        "reverse": False
+    }
+    response = requests.get(url, params=params)
+    pprint(response.text)
+    #data = response.json()["result"][0]
+    data = response.json()["result"]
+    r = []
+    for dat in data:
+        r.append({"date": datetime.fromtimestamp(dat["open_time"]).strftime("%Y-%m-%d %H:%m") , "price": dat["open"]})
+    return r
+
+
+def get_prices_ByBit(coin:str, start_date:str, end_date:str, ):
     start = datetime.strptime(start_date, "%Y-%m-%d")
     end = datetime.strptime(end_date, "%Y-%m-%d")
     delta = timedelta(days=1)
@@ -67,13 +90,29 @@ def get_prices_ByBit(coin:str, start_date:str, end_date:str):
 
     prices = []
     for date in dates:
-        prices.append(get_price_ByBit(date, coin))
+        prices.append(get_price_ByBit(date, coin, ))
+    
+    return prices
+
+def get_prices_ByBit_interval(coin:str, start_date:str, end_date:str, interval)->list:
+    start = datetime.strptime(start_date, "%Y-%m-%d")
+    end = datetime.strptime(end_date, "%Y-%m-%d")
+    delta = timedelta(days=1)
+    dates = []
+
+    while start <= end:
+        dates.append(start.strftime("%Y-%m-%d"))
+        start += delta
+
+    prices = []
+    for date in dates:
+        prices.append(get_price_ByBit_interval_60m(date, coin, interval))
     
     return prices
 
 #GET /stocks/$stockId/coins/$coin/priceDaily/$from/$to
-def history_price_coin(coin:str,startDate:str,endDate:str):
-    history = get_prices_ByBit(coin, startDate,endDate)
+def history_price_coin(coin:str,startDate:str,endDate:str, ):
+    history = get_prices_ByBit(coin, startDate,endDate, )
     return history
 
 #GET /orders/$id
@@ -132,7 +171,7 @@ def delete_order(orderID):
 if __name__ == '__main__':
     #pprint(a)
     #a = get_price_coin()
-    a = get_btc_prices('2023-01-01','2023-01-03')
+    a = get_price_ByBit_interval_60m('2023-01-01','BTCUSD', '60')
     #a = get_btc_price("2023-01-01")
     print(a) 
 #     category="linear",

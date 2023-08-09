@@ -36,10 +36,22 @@ def get_price_now(stockId,coin):
 
 # /stocks/$stockId/coins/$coin/priceDaily/$from/$to
 @app.route('/stocks/<int:stockId>/coins/<string:coin>/priceDaily/<string:startDate>/<string:endDate>',methods=['GET'])
+@logger.catch
 def get_prices(stockId,coin, startDate, endDate):
     #2023-01-01','2023-01-03'
     if stockId == 1:
         prices= history_price_coin(coin,startDate,endDate)
+    else:
+        raise ValueError(f'Нет биржы с id {stockId}')
+    #stock = stocks_list()
+    return prices
+
+@app.route('/stocks/<int:stockId>/coins/<string:coin>/priceDaily/<string:startDate>/<string:endDate>/<string:interval>',methods=['GET'])
+@logger.catch
+def get_prices_intrval(stockId,coin, startDate, endDate, interval):
+    #2023-01-01','2023-01-03'
+    if stockId == 1:
+        prices= get_prices_ByBit_interval(coin,startDate,endDate, interval)
     else:
         raise ValueError(f'Нет биржы с id {stockId}')
     #stock = stocks_list()
