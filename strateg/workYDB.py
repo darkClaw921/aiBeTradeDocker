@@ -27,8 +27,8 @@ def truncate_string(string, max_length):
 intList = ['all_token', 'all_messages', 'time_epoh', 'token','orderID']
 floatList = ['token_price','amount','price_open',
               'price_insert','price_close','need_price_close','bb_bu',
-              'rate_change']
-dateTimeList = ['date_time']
+              'rate_change', 'lower_price', 'upper_price']
+dateTimeList = ['date_time','date_close']
 class Ydb:
     def replace_query(self, tableName: str, rows: dict):
         field_names = rows.keys()
@@ -62,7 +62,7 @@ class Ydb:
         value = value[:-1] + ')'
         # values_placeholder_format = ', '.join(my_list)
         query = f"REPLACE INTO `{tableName}` ({fields_format}) VALUES {value}"
-        print(query)
+        #print(query)
         def a(session):
             session.transaction(ydb.SerializableReadWrite()).execute(
             #session(ydb.SerializableReadWrite()).execute(

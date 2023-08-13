@@ -51,7 +51,7 @@ def get_price_ByBit(date, coin, interval='D'):
         "reverse": False
     }
     response = requests.get(url, params=params)
-    pprint(response.text)
+    #pprint(response.text)
     data = response.json()["result"][0]
 
     return {"date": datetime.fromtimestamp(data["open_time"]).strftime("%Y-%m-%d"), "price": data["open"]}
