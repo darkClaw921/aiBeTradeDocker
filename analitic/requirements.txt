@@ -14,3 +14,5 @@ flask
 #Flask-RESTX
 #flask-swagger
 flask-swagger-ui
+python-dotenv
+loguru

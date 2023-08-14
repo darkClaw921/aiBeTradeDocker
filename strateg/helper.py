@@ -33,6 +33,10 @@ def get_dates(day):
 
     return current_date, future_date
 
+def date_now():
+    patern = '%Y-%m-%dT%H:%M:%S'
+    current_date = datetime.now().strftime(patern)
+    return current_date+'Z'
 # Создаем пустой список для хранения нового массива
 def array(arr: list)->list:
     new_arr = []

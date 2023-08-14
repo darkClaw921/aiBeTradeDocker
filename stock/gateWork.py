@@ -95,7 +95,7 @@ def create_order(order):
         last_price = order['price']
     except:
         last_price = tickers[0].last
-    logger.info(f'{last_price}')
+    logger.info(f'{last_price=}')
     # pair = spot_api.get_currency_pair(currency_pair) 
     # min_amount = pair.min_base_amount
     # order_amount = D(min_amount) * 2

@@ -3,17 +3,22 @@ from tradesWork import get_trends
 import requests
 from pprint import pprint
 from loguru import logger
-from helper import array, get_average, time_epoch
+from helper import array, get_average, time_epoch,date_now
 from workYDB import Ydb
 from modelsForecast import get_forecast_SARIMAX
-
+from dotenv import load_dotenv
+import os
+load_dotenv()
 sql = Ydb()
 
+logger.add('log_file.log',level='DEBUG')
+
+STOCK_URL = os.environ.get('STOCK_URL')
 
 #TODO запрос на получение цены коина это stock /stocks/$stockId/coins/$coin/priceDaily/$from/$to
 #получаем прайс на даты как в тренде и потом считаем
 #b = [{"date":"2023-08-02","price":"29704.5"},{"date":"2023-08-03","price":"29180.5"},{"date":"2023-08-04","price":"29186"},{"date":"2023-08-05","price":"29088.5"},{"date":"2023-08-06","price":"29053.5"},{"date":"2023-08-07","price":"29064"},{"date":"2023-08-08","price":"29191.5"},{"date":"2023-08-09","price":"29760.5"}]
-@logger.catch
+# @logger.catch
 def add_7d_trends_to_YDB(onlyNOW=False):
     trends = get_trends()
     first_key = list(trends.keys())[0].split(' ')[0]
@@ -21,26 +26,26 @@ def add_7d_trends_to_YDB(onlyNOW=False):
 
     #req1 = requests.get(f'http://127.0.0.1:5001/stocks/1/coins/BTCUSD/priceDaily/{first_key}/{last_key}')
     
-    req = requests.get(f'http://127.0.0.1:5001/stocks/1/coins/BTCUSD/priceDaily/{first_key}/{last_key}/60')
+    req = requests.get(f'{STOCK_URL}/stocks/1/coins/BTCUSD/priceDaily/{first_key}/{last_key}/60')
     
     #req = requests.get(f'{stockURL}/stocks/1/coins/BTCUSD/priceDaily/2023-01-01/2023-08-10/60')
-    
-    priceNow =requests.get(f'http://127.0.0.1:5001/stocks/1/coins/BTCUSD/price') 
+
+    priceNow =requests.get(f'{STOCK_URL}/stocks/1/coins/BTCUSD/price') 
     priceNow = float(eval(priceNow.text)['price'])
-    print(f'{priceNow=}')
+    logger.debug(f'{priceNow=}')
     
-    #print(req.text)stocks/1/coins/BTCUSD/price
+    #logger.debug(req.text)stocks/1/coins/BTCUSD/price
     pricePairHour = eval(req.text)
     pricePairHour = array(pricePairHour)
-    #print(f'{pricePairHour=}')
+    #logger.debug(f'{pricePairHour=}')
     #b=req1.text
     
     #forecast(pricePairHour)
     
     
-    #print(pricePairHour)
+    #logger.debug(pricePairHour)
    
-    #pprint(trends)
+    #plogger.debug(trends)
     i = 0
     RateChange = float(pricePairHour[-2]['price'])-float(pricePairHour[-1]['price'])
 
@@ -48,8 +53,8 @@ def add_7d_trends_to_YDB(onlyNOW=False):
     last_value = values[-1]
     second_last_value = values[-2]
     BBBU = second_last_value[1] / last_value[0]
-    print(f'{RateChange=}')
-    print(f'{BBBU=}')
+    # logger.debug(f'{RateChange=}')
+    # logger.debug(f'{BBBU=}')
 
     dateStart = pricePairHour[0]['date'].replace(' ','T')+'Z'
     dateEnd = pricePairHour[-1]['date'].replace(' ','T')+'Z'
@@ -66,48 +71,58 @@ def add_7d_trends_to_YDB(onlyNOW=False):
         'strat': 'real',
         'type': 'real'
     } 
-    
+    sql.replace_query('strateg', row)
     if onlyNOW:
         riskPersent = 0.3
-        #sql.replace_query('strateg', row)
+        sql.replace_query('strateg', row)
         prognoz = get_prognoz(dateStart, dateEnd)
-        #sql.replace_query('analitic', row2)
-        targetPrice, lowerPrice, upperPrice =get_forecast_SARIMAX(pricePairHour)
+        
+        targetPrice, lowerPrice, upperPrice, dateClose=get_forecast_SARIMAX(pricePairHour)
         #DealPrice = TargetPrice - RiskPercent ДО ЦЕНЫ TPDownLevel
         riskPrice = (targetPrice - lowerPrice) * riskPersent
         
-        print(f'{riskPrice=}')
+        logger.debug(f'{riskPrice=}')
         priceOpen = targetPrice - riskPrice
         priceClose = targetPrice + riskPrice
-        print(f'{priceClose=}')
-        print(f'{priceOpen=}')
-        #dealPrice = prognozPrice - (lowerPrice + (lowerPrice * riskPersent))
-        #dealPrice = targetPrice - riskPrice
+        logger.debug(f'{priceClose=}')
+        logger.debug(f'{priceOpen=}')
+       
         dealPrice = priceOpen 
-        print(f'{priceNow=}')
-        print(f'{dealPrice=}')
-        print(f'{priceNow <= dealPrice=}')
-        # row = {
-        #     'time_epoh': time_epoch(),
-        #     #'date_close': str(dateClose).replace(' ','T')+'Z',
-        #     'date_close': dateClose[0],
-        #     'price_close': targetPrice,
-        #     'strat': 'strat1',
-        #     'type': 'prognoz',
-        #     'lower_price':lowerPrice,
-        #     'upper_price':upperPrice,
-        # }
-        # sql.replace_query('analitic', row)
-        #forecast(pricePairHour)
-        #TODO передать параметры для ордера и открыть его 
+        logger.debug(f'{priceNow=}')
+        logger.debug(f'{dealPrice=}')
+        logger.debug(f'{priceNow <= dealPrice=}')
         
-        return prognoz, dealPrice 
+        sql.replace_query('analitic', row2)
+        
+        row = {
+            'time_epoh': time_epoch(),
+            #'date_close': str(dateClose).replace(' ','T')+'Z',
+            'date_open': date_now(),
+            #'date_close': dateClose,
+            #'price_close': targetPrice,
+            'price_open': float(priceNow),
+            'strat': 'strat1',
+            'type': 'prognoz',
+            #'lower_price':lowerPrice,
+            #'upper_price':upperPrice,
+            'currency_pair':'BTC_USDT',
+            'need_data_close':  str(dateClose).replace(' ','T')+'Z',
+            'need_price_close': targetPrice,
+            'side': prognoz,
+            'stock_id': 2,
+
+        }
+        sql.replace_query('prognoz', row)
+        #forecast(pricePairHour)
+        
+        
+        return prognoz
         
     # AverageBBBU = []
     # AverageRateChange = []
     #все сразу
     for key,value in trends.items():
-        #print(key, b[i]['date'])
+        #logger.debug(key, b[i]['date'])
         date = key
         BB = value[1] #buy bitcoin
         BU = value[0] #BTC USD
@@ -119,7 +134,7 @@ def add_7d_trends_to_YDB(onlyNOW=False):
         except:
             RateChange = float(pricePairHour[i]['price']) - float(pricePairHour[i-1]['price'])
         
-        #print(f'{date=} {BBBU=} {RateChange=}') 
+        #logger.debug(f'{date=} {BBBU=} {RateChange=}') 
         row = {'date_time': date.replace(' ','T')+'Z',
                'bb_bu': BBBU,
                'rate_change': RateChange,
@@ -147,14 +162,14 @@ def get_prognoz(dateStart,dateEnd):
     data =sql.select_query('strateg', f'datetime("{dateEnd}") > date_time and datetime("{dateStart}") < date_time ')
     BBBU = data[-1]["bb_bu"]
     RateChange= data[-1]['rate_change']
-    #pprint(a)
+    #plogger.debug(a)
     AverageBBBU = get_average(to='bb_bu',lst=data)
-    print(f'{AverageBBBU=}')
-    print(f'{BBBU=}')
+    logger.debug(f'{AverageBBBU=}')
+    logger.debug(f'{BBBU=}')
 
     AverageRateChange = get_average(to='rate_change',lst=data)
-    print(f'{AverageRateChange=}')
-    print(f'{RateChange=}')
+    logger.debug(f'{AverageRateChange=}')
+    logger.debug(f'{RateChange=}')
 
     if BBBU > AverageBBBU and RateChange > AverageRateChange:
         return 'BUY'
@@ -198,18 +213,18 @@ def forecastARIMA(data):
     # Прогнозируем будущие значения
     forecast = model_fit.forecast(steps=1)
 
-    print(f'{forecast=}')
+    logger.debug(f'{forecast=}')
     dateClose = forecast.keys()[0]
     priceClose = forecast[0] 
     #b = forecast[0]
-    #print(a,b)
+    #logger.debug(a,b)
     # forecast_values = forecast.predicted_mean()
     # lower_bound = forecast.conf_int()["lower price"]
     # upper_bound = forecast.conf_int()["upper price"]
 
-    # print(forecast_values)
-    # print(lower_bound)
-    # print(upper_bound)
+    # logger.debug(forecast_values)
+    # logger.debug(lower_bound)
+    # logger.debug(upper_bound)
     # 1/0
     for key, value in forecast.items():
         dateClose = key 
@@ -257,23 +272,23 @@ def forecast(data):
 
     # Извлечение прогнозных значений и доверительных интервалов
     # f1orecast_values = forecast.predicted_mean
-    # print(f1orecast_values)
+    # logger.debug(f1orecast_values)
     #forecast_values = forecast.conf_int()
-    # print(f'{forecast_values=}')
+    # logger.debug(f'{forecast_values=}')
     # for i in forecast:
-    #     print(i)
+    #     logger.debug(i)
     # 1/0
     b = forecast.row_labels[0]
-    print(b)
+    logger.debug(b)
     lower_bound = forecast.conf_int()["lower price"]
     upper_bound = forecast.conf_int()["upper price"]
 
-    # print(f'{forecast_values=}')
-    print(f'{lower_bound=}')
-    print(f'{upper_bound=}')
-    print(len(forecast.conf_int()))
-    print(f'{forecast.conf_int()=}')
-    print(f'{forecast.predicted_mean=}')
+    # logger.debug(f'{forecast_values=}')
+    logger.debug(f'{lower_bound=}')
+    logger.debug(f'{upper_bound=}')
+    logger.debug(len(forecast.conf_int()))
+    logger.debug(f'{forecast.conf_int()=}')
+    logger.debug(f'{forecast.predicted_mean=}')
     #for key, value in forecast.items():
     for i,date in enumerate(forecast.row_labels):
     #for key,value in forecast.conf_int().items():
@@ -287,7 +302,7 @@ def forecast(data):
         row = {
             'time_epoh': time_epoch(),
             #'date_close': str(dateClose).replace(' ','T')+'Z',
-            'date_close': dateClose[0],
+            'date_close': dateClose,
             'price_close': priceClose,
             'strat': 'strat1',
             'type': 'prognoz',
@@ -295,17 +310,13 @@ def forecast(data):
             'upper_price':upper_bound,
         } 
         #sql.replace_query('analitic', row)
-        sql.replace_query('analitic', row)
-        
-
-
-
+        #sql.replace_query('analitic', row)
 
 
 def main():
     #pr = get_prognoz('2023-08-02', '2023-08-04')
-    pr = add_7d_trends_to_YDB(onlyNOW=True)
-    print(f'{pr=}')
+    pr = add_7d_trends_to_YDB(onlyNOW=False)
+    logger.debug(f'{pr=}')
 
 def add_real_price(data):
     for i in data:
@@ -349,7 +360,7 @@ if __name__ == "__main__":
     #forecast()
     #prepare_data_excel(b)
     # price = get_only_price(b)
-    # print(price)
+    # logger.debug(price)
     #forecast(b)
     #forecastARIMA()
     #add_real_price(b)

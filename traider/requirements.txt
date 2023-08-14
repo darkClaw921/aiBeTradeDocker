@@ -1,9 +1,9 @@
 ipywidgets
 ydb
 ydb[yc]
-redis
-python-binance
 flask
 #Flask-RESTX
 #flask-swagger
 flask-swagger-ui
+python-dotenv
+loguru

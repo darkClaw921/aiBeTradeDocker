@@ -14,3 +14,4 @@ flask
 #Flask-RESTX
 #flask-swagger
 flask-swagger-ui
+loguru

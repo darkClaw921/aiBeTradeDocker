@@ -1,6 +1,7 @@
 from flask import Flask 
 #from analitic.helper import forecast, forecastText, forecastDaily 
 from bybitWork import *
+from strat import add_7d_trends_to_YDB
 # Создание экземпляра Flask приложения
 from infoStrat import *
 app = Flask(__name__)
@@ -32,14 +33,13 @@ def get_strategie_signal(name):
 # 		“$param2”: $value2,
 # }
 # }
-@app.route('/strategies/<string:name>/actions/<int:stockID>/<string:coin>', methods=['POST'])
-def get_strategie_signal(name, stockID, coin):
-    pass
 
 # GET /strategies/$name/actions/$stockId/$coin
 @app.route('/strategies/<string:name>/actions/<int:stockID>/<string:coin>', methods=['GET'])
-def get_strategie_signal(name, stockID, coin):
-    pass
+def get_strategie_prognoz(name, stockID, coin):
+    prognoz = add_7d_trends_to_YDB(True)
+    return {'body':prognoz, 'status':200}
+   
 
 # {
 # 	“strategy”: “name of strategy”, 
@@ -57,5 +57,5 @@ def get_strategie_signal(name, stockID, coin):
 
 # Запуск приложения
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port='5001')
+    app.run(host='0.0.0.0', port='5002')
     # 0000 позволяет получать запросы не только по localhost

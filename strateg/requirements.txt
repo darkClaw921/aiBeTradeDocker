@@ -7,3 +7,8 @@ flask
 #Flask-RESTX
 #flask-swagger
 flask-swagger-ui
+python-dotenv
+pytrends
+loguru 
+pybit
+statsmodels

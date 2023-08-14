@@ -11,7 +11,7 @@ FROM python:3.10
 WORKDIR /app
 
 # Копируем файлы helper.py, chat.py, workFlask.py и workBinance.py в директорию /app контейнера
-COPY workFlask.py bybitWork.py /app/
+COPY workFlask.py bybitWork.py helper.py infoStrat.py modelsForecast.py strat.py tradesWork.py workYDB.py /app/
 
 # Копируем файл requirements.txt в директорию /app контейнера
 COPY requirements.txt /app/
@@ -20,8 +20,8 @@ COPY requirements.txt /app/
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Открываем порт 5000 (или любой другой необходимый порт)
-EXPOSE 5000
+EXPOSE 5002
 
 # Копируем файл .env внутрь контейнера
-#COPY .env /app/
+COPY .env authorized_key.json /app/
 CMD ["python", "workFlask.py"]

@@ -1,0 +1,34 @@
+CREATE TABLE `prognoz`
+(
+    `time_epoh` Uint64,
+    `currency_pair` String,
+    `date_close` Datetime,
+    `date_open` Datetime,
+    `need_data_close` Datetime,
+    `need_price_close` Double,
+    `price_close` Double,
+    `price_open` Double,
+    `side` String,
+    `stock_id` Int8,
+    `strat` String,
+    `type` String,
+    PRIMARY KEY (`time_epoh`)
+);
+
+CREATE TABLE `analitic`
+(
+    `time_epoh` Uint64,
+    `currency_pair` String,
+    `date_close` Datetime,
+    `date_open` Datetime,
+    `lower_price` Double,
+    `need_date_close` Datetime,
+    `need_price_close` Double,
+    `price_close` Double,
+    `price_open` Double,
+    `side` String,
+    `strat` String,
+    `type` String,
+    `upper_price` Double,
+    PRIMARY KEY (`time_epoh`)
+);

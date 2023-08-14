@@ -16,18 +16,4 @@ CREATE TABLE `order`
     PRIMARY KEY (`time_epoh`)
 );
 
-CREATE TABLE `prognoz`
-(
-    `time_epoh` Uint64,
-    `currency_pair` String,
-    `date_close` String,
-    `date_open` String,
-    `need_date_close` String,
-    `need_price_close` Double,
-    `price_close` Double,
-    `price_open` Double,
-    `side` String,
-    `type` string,
-    
-    PRIMARY KEY (`time_epoh`)
-);
+

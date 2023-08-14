@@ -32,6 +32,6 @@ def coin(stockId, coin, func, days):
 if __name__ == '__main__':
     # 0000 позволяет получать запросы не только по localhost
     #app.run(host='0.0.0.0')
-    app.run(host='0.0.0.0', port='5001')
+    app.run(host='0.0.0.0', port='5003')
     #answer = forecastText(1)
     #print(answer)

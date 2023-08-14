@@ -45,10 +45,13 @@ def get_forecast_SARIMAX(data, dayForecast: int=0, persentCoridor:float=0.0075):
     print(f'{lower_bound=}')
     print(f'{upper_bound=}')
     #DealPrice = TargetPrice - RiskPercent ДО ЦЕНЫ TPDownLevel
+    dateClose =str(pred.keys()[0])
+    datetime_obj = datetime.strptime(dateClose, '%Y-%m-%d %H:%M:%S')
+    formatted_timestamp = datetime_obj.strftime('%Y-%m-%dT%H:%M:%SZ')
     row = {
             'time_epoh': time_epoch(),
             #'date_close': str(dateClose).replace(' ','T')+'Z',
-            'date_close': pred.keys()[0],
+            'date_close': formatted_timestamp,
             'price_close': pred.values[0],
             'strat': 'strat1',
             'type': 'prognoz',
@@ -57,7 +60,8 @@ def get_forecast_SARIMAX(data, dayForecast: int=0, persentCoridor:float=0.0075):
         } 
         #sql.replace_query('analitic', row)
     sql.replace_query('analitic', row)
-    return price,lower_bound,upper_bound 
+    return price,lower_bound,upper_bound, pred.keys()[0] 
 
 if __name__ == '__main__':
-    main11()
+   #get_forecast_SARIMAX()
+   pass

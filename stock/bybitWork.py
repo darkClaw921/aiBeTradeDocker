@@ -69,7 +69,7 @@ def get_price_ByBit_interval_60m(date, coin, interval='60')->list:
         "reverse": False
     }
     response = requests.get(url, params=params)
-    pprint(response.text)
+    #pprint(response.text)
     #data = response.json()["result"][0]
     data = response.json()["result"]
     r = []
