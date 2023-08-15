@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template
 #from analitic.helper import forecast, forecastText, forecastDaily 
 from bybitWork import *
-from gateWork import *
+# from gateWork import *
 # Создание экземпляра Flask приложения
 app = Flask(__name__)
 def stocks_list():
@@ -75,13 +75,20 @@ def set_order():
     #2023-01-01','2023-01-03'
     data = request.get_json() 
     
-    data['amount'] = Decimal(data['amount'])
+    data['amount'] = float(Decimal(data['amount']))
     print(data)
     try:
         order = create_order(data)
     except Exception as e:
         raise ValueError(e)
         #return e
+#     {
+# “stock”: “byibe”, // название биржи
+# “coin”: “btc”, // название токена
+# “amount”: 10, // количество токенов
+# “mode”: “buy | sell”, // режим ордера (купить, продать)
+# }
+
     # if stockId == 1:
     #     prices= history_price_coin(coin,startDate,endDate)
     # else:

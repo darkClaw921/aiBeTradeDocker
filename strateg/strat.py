@@ -109,7 +109,7 @@ def add_7d_trends_to_YDB(onlyNOW=False):
             'need_data_close':  str(dateClose).replace(' ','T')+'Z',
             'need_price_close': targetPrice,
             'side': prognoz,
-            'stock_id': 2,
+            'stock_id': 1,
 
         }
         sql.replace_query('prognoz', row)

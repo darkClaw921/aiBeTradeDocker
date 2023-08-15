@@ -4,27 +4,24 @@ from pybit.unified_trading import HTTP
 from pprint import pprint
 import requests
 from datetime import datetime, timedelta
+from helper import time_epoch, get_dates
+from workYDB import Ydb
+from loguru import logger
 
 load_dotenv()
 api_key = os.environ.get('bybit_api')
 api_secret =os.environ.get('bybit_secret') 
 
+sql = Ydb()
+
 session = HTTP(
-    testnet=True,
-    api_key=api_key,
-    api_secret=api_secret,
-)
-# Get the orderbook of the USDT Perpetual, BTCUSDT
-# a = session.get_orderbook(category="linear", symbol="BTCUSDT")
-#print(a)
-# print(session.place_order(
-#     category="inverse",
-#     symbol="ETHUSD",
-#     side="Sell",
-#     orderType="Market",
-#     qty=1,
-# ))
-#1/0
+        testnet=False,
+        api_key=api_key,
+        api_secret=api_secret,
+    )
+
+
+
 #GET /stocks/$stockId/coins/$coin/price
 def get_price_now_ByBit(coin:str='BTCUSD'):
     #symbol = 'BTCUSD'  # Торговая пара: BTC/USD
@@ -116,20 +113,44 @@ def history_price_coin(coin:str,startDate:str,endDate:str, ):
     return history
 
 #GET /orders/$id
-def get_order_info(orderID):
+def info_order(orderID):
     
-    order = {
-'id':  'unique_token_of_ordedr',  # ID ордера
-'stock': 'byibe', # название биржи
-'coin': 'btc', # название токена
-'amount': 10, # количество токенов
-'mode': 'buy | sell', # режим ордера (купить, продать)
-'state': 'pending | posted| done | canceled' # Статус ордера
-}
-    return order
+    #currency_pair = sql.get_currency_pair(orderID)
+    # order = sql.select_query('order',f'orderID={orderID}')[0]
+    # print(f'{order=}')
+    
+
+    #from pybit.unified_trading import HTTP
+    # orderInfo = session.get_order_history(
+    #     category=order['category'].decode('utf-8'),
+    #     limit=1,
+    #     orderId=orderID
+    # )
+    orderInfo = session.get_order_history(
+        category='spot',
+        limit=1,
+        orderId=orderID
+    )
+    logger.info(f'{orderInfo=}')
+    orderInfo = orderInfo['result']['list'][0]
+    row = {
+        'status': orderInfo['orderStatus'], 
+    }
+    r = {'id': orderInfo['orderId'],
+         'stock': 'ByBit',
+         'coin': orderInfo['symbol'],
+         'amount': orderInfo['qty'],
+         'mode': orderInfo['side'],
+         'status': orderInfo['orderStatus']}
+    logger.info(r)
+
+    sql.update_query('order', row, f'orderID = "{orderID}"') 
+    return r
+
 
 #POST /orders
-def set_order(order):
+@logger.catch
+def create_order(order):
    # Input
 # {
 # 'stock': 'byibe',# название биржи
@@ -137,46 +158,121 @@ def set_order(order):
 # 'amount': 10,# количество токенов
 # 'mode': 'buy | sell',# режим ордера (купить, продать)
 # }
+    print(f'{order=}')
+    print(f'{order["price"]=}')
+    try:
+        price = order['price']
+    
 
-    order = {
-'id':  'unique_token_of_ordedr',  # ID ордера
-'stock': 'byibe', # название биржи
-'coin': 'btc', # название токена
-'amount': 10, # количество токенов
-'mode': 'buy | sell', # режим ордера (купить, продать)
-'state': 'pending | posted| done | canceled' # Статус ордера
-}
-    return order
-    pass
+        created = session.place_order(
+            category="spot",
+            symbol="BTCUSDT",
+            side= order['mode'].title(),
+            orderType="Limit",
+            qty=order['amount'],
+            price=str(price),
+            #timeInForce="PostOnly",
+            #orderLinkId="spot-test-postonly",
+            #isLeverage=0,
+           #orderFilter="Order",
+        )
+    except:
+        price = 0
+        created = session.place_order(
+            category="spot",
+            symbol="BTCUSDT",
+            side= order['mode'].title(),
+            orderType="Market",
+            qty=order['amount'],
+            #price="15600",
+            #timeInForce="PostOnly",
+            #orderLinkId="spot-test-postonly",
+            #isLeverage=0,
+            #orderFilter="Order",
+        ) 
+    
+    print(f'create order id {created["result"]["orderId"]}')
+    # r = {'id': created.id,
+    #      'stock': 'Gate',
+    #      'coin': created.currency_pair,
+    #      'amount': created.amount,
+    #      'mode': created.side,
+    #      'state': created.status}
+
+    # created = session.place_order(
+    #     category="spot",
+    #     symbol="BTCUSDT",
+    #     side="Buy",
+    #     orderType="Market",
+    #     #price=29300,
+    #     qty=0.0002,
+    # )
+    
+    #{'retCode': 0, 'retMsg': 'OK', 'result': {'orderId': '1487806611478068992', 'orderLinkId': '1692096369139910'}, 'retExtInfo': {}, 'time': 1692096369147}
+    row = {
+        'time_epoh': time_epoch(),
+        'amount': order['amount'],
+        'currency_pair' : order['coin'],
+        'date_open': get_dates(0)[0]+'Z',
+        'price_open': get_price_now_ByBit()['price'],
+        'status': 'Open',
+        'orderID': created['result']['orderId'],
+        'side': order['mode'],
+        'need_price_close': price,
+        'stock_id': 1,
+        'category':'spot',
+    }
+    sql.insert_query('order', row)
+    return row
+    
 
 #DELETE /orders/$id
-def delete_order(orderID):
-    return f'ордер {orderID} был отозван'
+def close_order(orderID):
+    order = sql.select_query('order',f'orderID="{orderID}"')[0]
+    print(f'{order=}')
 
-# Create five long USDC Options orders.
-# (Currently, only USDC Options support sending orders in bulk.)
-# payload = {"category": "option"}
-# orders = [{
-#   "symbol": "BTCUSDT",
-#   "side": "Buy",
-#   "orderType": "Limit",
-#   "qty": "0.1",
-#   "price": '10',
-# } ]
+    close = session.cancel_order(
+        category=order['category'].decode('utf-8'),
+        symbol=order['currency_pair'].decode('utf-8'),
+        orderId=order['orderID'].decode('utf-8'),
+    )
+    
 
-# payload["request"] = orders
-# # Submit the orders in bulk.
-# session.place_batch_order(payload)
+    row = {
+        'status': 'Cancelled',
+        'date_close': get_dates(0)[0]+'Z',
+        'price_close': get_price_now_ByBit()['price'] 
+    }
+
+    sql.update_query('order', row, f'orderID = "{orderID}"')
+    body = {'body': f"Ордер {close['result']['orderId']} был отозван"}
+    #return f'Ордер {close.id} был отозван', 200
+    return body
+#create order id {'retCode': 0, 'retMsg': 'OK', 'result': {'orderId': '1487885204187037440', 'orderLinkId': '1692105738118917'}, 'retExtInfo': {}, 'time': 1692105738128}
+
 
 if __name__ == '__main__':
-    #pprint(a)
-    #a = get_price_coin()
-    a = get_price_ByBit_interval_60m('2023-01-01','BTCUSD', '60')
-    #a = get_btc_price("2023-01-01")
-    print(a) 
-#     category="linear",
-#     symbol="BTCUSDT",
-#     side="Buy",
-#     orderType="Market",
-#     qty=0.001,
-# ))
+    pass
+    # delete_order(1487913031129153280)
+    # close = session.cancel_order(
+    #     category='spot',
+    #     symbol='BTCUSTD',
+    #     orderId='1487916687522062848',
+    # )
+    # print(close)
+    # 1/0
+    # r =  {
+# 'stock': 'byibe',# название биржи
+# 'coin': 'BTCUSDT',# название токена
+# 'amount': '0.004',# количество токенов
+# 'mode': 'buy',# режим ордера (купить, продать)
+# 'price': '100',
+# } 
+#     b = set_order(r)
+#     print(f'{b=}')
+
+#     a = get_order_info(b['orderID'])
+#     print(a)
+
+#     a = delete_order(b['orderID'])
+#     print(a)

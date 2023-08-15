@@ -24,11 +24,15 @@ def truncate_string(string, max_length):
         return string[:max_length]
     else:
         return string
-intList = ['all_token', 'all_messages', 'time_epoh', 'token','orderID']
-floatList = ['token_price','amount','price_open', 'price_insert','price_close','need_price_close']
+intList = ['all_token', 'all_messages', 'time_epoh', 'token', 'stock_id']
+
+floatList = ['token_price','amount','price_open',
+              'price_insert','price_close','need_price_close','bb_bu',
+              'rate_change', 'lower_price', 'upper_price','need_price_close','price_open']
+
+dateTimeList = ['date_time','date_close','need_data_close','date_open', 'date_open']
 class Ydb:
     def replace_query(self, tableName: str, rows: dict):
-        #print('попали в инсерт')
         field_names = rows.keys()
         fields_format = ", ".join(field_names)
         my_list = list(rows.values())
@@ -40,19 +44,27 @@ class Ydb:
                 value1 = value1.replace('"',"'")    
             except:
                 1 + 0
-
-            value1 = truncate_string(str(value1), 2000)            
             
+            #TODO переделать под разные форматы
+            value1 = truncate_string(str(value1), 2000)            
             if key == 'id':
                 value += f'{value1},'
+
+            elif key in intList:
+                value += f'{int(value1)},'
+            
+            elif key in floatList:
+                value += f'{float(value1)},'
+            
+            elif key in dateTimeList:
+                value += f'CAST("{value1}" AS datetime ),'
             else:
                 value += f'"{value1}",'
             
         value = value[:-1] + ')'
         # values_placeholder_format = ', '.join(my_list)
-        query = f"REPLACE INTO {tableName} ({fields_format}) VALUES {value}"
+        query = f"REPLACE INTO `{tableName}` ({fields_format}) VALUES {value}"
         print(query)
-
         def a(session):
             session.transaction(ydb.SerializableReadWrite()).execute(
             #session(ydb.SerializableReadWrite()).execute(
@@ -74,6 +86,10 @@ class Ydb:
                 sets += f'{key} = {float(value)},'
             elif key in intList:
                 sets += f'{key} = {int(value)},'
+            
+            elif key in dateTimeList:
+                sets += f'{key} = CAST("{value}" AS datetime ),' 
+            
             else:
                 sets += f'{key} = "{value}",'
 
@@ -161,6 +177,8 @@ class Ydb:
             
             elif key in floatList:
                 value += f'{float(value1)},'
+            elif key in dateTimeList:
+                value += f'CAST("{value1}" AS datetime ),' 
             else:
                 value += f'"{value1}",'
             
