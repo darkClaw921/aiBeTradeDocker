@@ -24,11 +24,13 @@ def truncate_string(string, max_length):
         return string[:max_length]
     else:
         return string
-intList = ['all_token', 'all_messages', 'time_epoh', 'token','orderID']
+intList = ['all_token', 'all_messages', 'time_epoh', 'token',]
+
 floatList = ['token_price','amount','price_open',
               'price_insert','price_close','need_price_close','bb_bu',
-              'rate_change', 'lower_price', 'upper_price']
-dateTimeList = ['date_time','date_close']
+              'rate_change', 'lower_price', 'upper_price','profit','profit_persent']
+
+dateTimeList = ['date_time','date_close','date_close']
 class Ydb:
     def replace_query(self, tableName: str, rows: dict):
         field_names = rows.keys()
@@ -85,6 +87,8 @@ class Ydb:
                 sets += f'{key} = {float(value)},'
             elif key in intList:
                 sets += f'{key} = {int(value)},'
+            elif key in dateTimeList:
+                sets += f'{key} = CAST("{value}" AS datetime ),' 
             else:
                 sets += f'{key} = "{value}",'
 

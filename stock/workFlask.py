@@ -8,7 +8,7 @@ def stocks_list():
     stocks = [{
         "id": 1,
         "name":"ByBit", # Название биржи
-        "url": "https://www.bybit.com/",# главная страница биржи
+        "url": "https://www.bybit.com/",# главная страница бирж
         "apiUrl": "https://bybit-exchange.github.io/docs/category/derivatives" ## Путь к API биржи
     }, {
         "id": 2,

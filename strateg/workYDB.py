@@ -28,7 +28,7 @@ intList = ['all_token', 'all_messages', 'time_epoh', 'token','orderID', 'stock_i
 
 floatList = ['token_price','amount','price_open',
               'price_insert','price_close','need_price_close','bb_bu',
-              'rate_change', 'lower_price', 'upper_price','need_price_close','price_open']
+              'rate_change', 'lower_price', 'upper_price','need_price_close','price_open', 'price_now']
 
 dateTimeList = ['date_time','date_close', 'need_data_close','date_open']
 class Ydb:
