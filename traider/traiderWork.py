@@ -119,7 +119,7 @@ def check_orders():
     
     for row in rows:
         orderID = row['orderID'].decode('utf-8')
-        if date_now - row['date_open']
+        #if date_now - row['date_open']
         req = requests.get(f'{STOCK_URL}/orders/{orderID}',)
         #req = requests.post(f'{STOCK_URL}/stocks',)
         rez = req.text

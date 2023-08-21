@@ -37,21 +37,21 @@ def get_dates(day):
     future_date = (datetime.now() + delta).strftime("%d/%m/%Y")
 
     return current_date, future_date
-def
-# Задаем начальную и конечную метки времени
-timestamp1 = 1692162023853
-timestamp2 = 1692169759912
+# def
+# # Задаем начальную и конечную метки времени
+# timestamp1 = 1692162023853
+# timestamp2 = 1692169759912
 
-# Конвертируем метки времени в объекты datetime
-date1 = datetime.fromtimestamp(timestamp1 / 1000)
-date2 = datetime.fromtimestamp(timestamp2 / 1000)
+# # Конвертируем метки времени в объекты datetime
+# date1 = datetime.fromtimestamp(timestamp1 / 1000)
+# date2 = datetime.fromtimestamp(timestamp2 / 1000)
 
-# Вычисляем разницу во времени 
-difference = date2 - date1
+# # Вычисляем разницу во времени 
+# difference = date2 - date1
 
-# Выводим количество прошедших часов
-hours = difference.total_seconds() / 3600
-print("Прошло", hours, "часов")
+# # Выводим количество прошедших часов
+# hours = difference.total_seconds() / 3600
+# print("Прошло", hours, "часов")
 
 
 # Создаем пустой список для хранения нового массива
